@@ -1,0 +1,72 @@
+
+@extends('layouts.app')
+
+@section('content')
+    <h1>Nova Planta editado</h1>
+    <form action="/admin/planta" method="POST">
+        @csrf
+        <input name="nome_popular"    placeholder="nome_popular">   <br>
+        <input name="especie" placeholder="especie"><br>
+        <label for="e_panc">E Panc:</label>
+        <input type="checkbox" id="e_panc" name="e_panc"  {{ old('e_panc', $planta->e_panc ?? false) ? 'checked' : '' }} >
+
+        <label for="e_apicola">E Apicola:</label>
+        <input type="checkbox" id="e_apicola" name="e_apicola" {{ old('e_apicola', $planta->e_apicola ?? false) ? 'checked' : '' }} >
+
+        <label for="e_forrageira">E forrageira:</label>
+        <input type="checkbox" id="e_forrageira" name="e_forrageira" {{ old('e_forrageira', $planta->e_forrageira ?? false) ? 'checked' : '' }}>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+
+<!-- Exemplo de mensagens no layout -->
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
+
+    <h2>Plantas Cadastradas</h2>
+
+    <input type="text" id="campo-busca" placeholder="Buscar por nome...">
+
+    <div id="tabela-plantas">
+        {{-- Conteúdo da tabela será carregado aqui via AJAX --}}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const campoBusca = document.getElementById('campo-busca');
+            const tabelaContainer = document.getElementById('tabela-plantas');
+
+            function buscarPlantas() {
+                const termo = campoBusca.value;
+
+                fetch(`/plantas/buscar?busca=${encodeURIComponent(termo)}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        tabelaContainer.innerHTML = html;
+//                       alert('ok');
+                    });
+            }
+
+            // Buscar automaticamente ao digitar (com pequeno atraso)
+            let timer;
+            campoBusca.addEventListener('input', () => {
+                clearTimeout(timer);
+                timer = setTimeout(buscarPlantas, 300);
+            });
+
+            // Carregar tabela inicialmente
+            buscarPlantas();
+        });
+    </script>
+
+@endsection
